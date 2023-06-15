@@ -1,7 +1,9 @@
 ---
 title: "Activity: Nuclear Reactors"
 author: "YOUR NAME HERE"
-output: html_notebook
+output: 
+  html_notebook: 
+    fig_height: 7
 ---
 
 ```{r}
@@ -9,7 +11,7 @@ library(tidyverse)
 
 ```
 
-## Scrape the Data 
+## Scrape the Data
 
 ```{r}
 #My code here.... 
@@ -36,37 +38,67 @@ Japan <-
          operation = `Commercialoperation`, 
          closure = Closed)
 # Remove the first row
-Japan <- Japan[-1]
+Japan <- Japan[-1,]
 Japan
 ```
 
-
-## Your turn: In what ways is the table tidy? How is it not tidy? What’s different about it from a tidy table?
+## Your turn: In what ways is the table tidy? How is it not tidy? What's different about it from a tidy table?
 
 Colums like plantname has names of plants separated by space, which is not tidy. Other than that, it looks tidy.
-
 
 ## Your Turn: Plot Net Generation Capacity vs Construction Date
 
 ```{r}
 #my code here 
-
+Japan %>%
+  ggplot(aes(x = lubridate::dmy(construction), y = as.numeric(netMW), color=type)) + 
+  labs(y = "ractorID", x = "operation") +
+  geom_point() 
 
 ```
 
+In general, the newer are the reactors, the more net generation capacity it has. When it comes to the type, BWR seems to outperform other types.
 
 ## Your Turn: Scrape & Clean China Data (then merge with Japan)
 
 ```{r}
 #my code here... 
-
+library(gdata)
+# Remove null columns
+China <- tableList[[10]][1:9]
+# Rename columns
+China <-
+  China %>%
+  rename(name = Plantname, 
+         reactor = `UnitNo.`,
+         type = Type,
+         model = Model,
+         status = Status, 
+         netMW = `Capacity(MW)`,
+         construction = `Beginbuilding`,
+         operation = `Commercialoperation`, 
+         closure = Closed)
+# Remove the first two rows
+China <- China[-1,]
+China <- China[-1,]
+#full outer join
+JapanChina <- combine(China, Japan)
+JapanChina
 ```
 
-
+After reading some post on stackoverflow, I have decided to use combine function from gdata library, because it automatically adds the source of data to the combined dataset.
 
 ## Your Turn: Reconstruct Info Graphic of Japan Reactors (or other country of interest)
 
 ```{r}
 #My code here
-
+toGraph <- Japan %>%
+  group_by(name) %>%
+  mutate(reactorID = paste(name, row_number()))
+toGraph %>%
+  mutate(status_change = !is.na(status)) %>%
+  ggplot(aes(x = lubridate::dmy(construction), y = reactorID, color=type)) + 
+  geom_segment(aes(x = lubridate::dmy(construction), xend=lubridate::dmy(operation), yend=reactorID)) +
+  labs(y = "reactorID", x = "operation")  +
+  geom_point()
 ```

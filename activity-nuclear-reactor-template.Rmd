@@ -1,6 +1,6 @@
 ---
 title: "Activity: Nuclear Reactors"
-author: "YOUR NAME HERE"
+author: "Abdulaziz Bokijonov"
 output: 
   html_notebook: 
     fig_height: 7
@@ -41,18 +41,18 @@ Japan <-
 Japan <- Japan[-1,]
 Japan
 ```
+Parsing the raw table created 9 more unnecessary empty columns and one row that contained column lables. Thus, I had to remove those 9 columns and one row that had column labels.
 
 ## Your turn: In what ways is the table tidy? How is it not tidy? What's different about it from a tidy table?
 
-Colums like plantname has names of plants separated by space, which is not tidy. Other than that, it looks tidy.
+Columns like plantname has names of plants separated by space, which is not tidy. Also, some cells do not have any data.
 
 ## Your Turn: Plot Net Generation Capacity vs Construction Date
 
 ```{r}
 #my code here 
 Japan %>%
-  ggplot(aes(x = lubridate::dmy(construction), y = as.numeric(netMW), color=type)) + 
-  labs(y = "ractorID", x = "operation") +
+  ggplot(aes(x = lubridate::dmy(construction), y = as.numeric(netMW), color=type)) +
   geom_point() 
 
 ```
@@ -99,6 +99,8 @@ toGraph %>%
   mutate(status_change = !is.na(status)) %>%
   ggplot(aes(x = lubridate::dmy(construction), y = reactorID, color=type)) + 
   geom_segment(aes(x = lubridate::dmy(construction), xend=lubridate::dmy(operation), yend=reactorID)) +
+  scale_y_discrete(guide = guide_axis(n.dodge=2)) +
   labs(y = "reactorID", x = "operation")  +
   geom_point()
 ```
+For this graph, because the y axis contained to many lables and they were overlaping each other, I used scale_y_discrete function to solve for that  
